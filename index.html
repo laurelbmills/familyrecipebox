@@ -318,11 +318,20 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;}
 }
 .subcat-row{display:flex;flex-wrap:wrap;gap:.35rem;}
 .subcat-pill{
+  display:inline-flex;align-items:center;gap:.45rem;
   font-family:var(--ui);font-size:.66rem;font-weight:700;
   letter-spacing:.1em;text-transform:uppercase;
-  padding:.4rem .8rem;border-radius:999px;
+  padding:.4rem .8rem .4rem .55rem;border-radius:999px;
   border:1px solid rgba(36,26,34,.2);color:var(--ink-2);
 }
+/* the swatch is the key: this color is what those cards look like */
+.subcat-pill .sw{
+  width:11px;height:11px;border-radius:3px;flex-shrink:0;
+  background:var(--sw,transparent);
+  box-shadow:inset 0 0 0 1px rgba(38,48,47,.18);
+}
+.subcat-pill[data-sub=""] .sw{display:none;}
+.subcat-pill.active .sw{box-shadow:inset 0 0 0 1px rgba(255,255,255,.35);}
 .subcat-pill:hover{border-color:var(--ink);color:var(--ink);}
 .subcat-pill.active{background:var(--ink);color:var(--paper);border-color:var(--ink);}
 
@@ -1020,14 +1029,40 @@ var CARDS = [{"id":"bread-bowls","title":"Bread Bowls","cat":"breads","catName":
   /* muted versions used on the recipe cards */
   var SOFT = {butter:'#E8F3A0', tangerine:'#F3A89D', aqua:'#C2E9E7', tomato:'#F3A89D', chartreuse:'#E8F3A0', vista:'#C2E9E7', neonpink:'#F3A89D', bubblegum:'#C2E9E7', lavender:'#E8F3A0'};
   var TINT = {butter:'#F8F9DC', tangerine:'#FBE0D9', aqua:'#EBF6F2', tomato:'#FBE0D9', chartreuse:'#F8F9DC', vista:'#EBF6F2', neonpink:'#FBE0D9', bubblegum:'#EBF6F2', lavender:'#F8F9DC'};
-  /* every card gets its own color, stable per recipe, so a category page
-     reads as a mixed set rather than one flat block of one hue */
-  var PALETTE = ['butter','tangerine','aqua','tomato','chartreuse',
-                 'vista','neonpink','bubblegum','lavender'];
-  function cardColor(id){
-    var h = 0, i;
-    for(i = 0; i < id.length; i++){ h = (h * 31 + id.charCodeAt(i)) >>> 0; }
-    return PALETTE[h % PALETTE.length];
+  /* card color now means something: one shade per subcategory.
+     Eight steps built from the three palette colors, ordered so neighbours
+     in a category's list never land on the same hue. All clear 4.5:1 on ink. */
+  var SUBSTRIP = ['#EB7263','#9FDCD9','#DCEB71','#F4B0A8',
+                  '#89BCB4','#EBF4B0','#C7EAE9','#B8C864'];
+  var SUBTINT  = ['#FAD9D2','#E6F4F1','#F6F8D6','#FCE9E4',
+                  '#E0ECE7','#FAFBE6','#F0F8F5','#EDEFD2'];
+
+  /* subcategories, sorted, per category — index decides the shade */
+  var SUBIDX = (function(){
+    var m = {};
+    CATS.forEach(function(c){
+      var subs = {};
+      CARDS.forEach(function(x){ if(x.cat===c.key && x.sub) subs[x.sub]=1; });
+      var names = Object.keys(subs).sort();
+      var idx = {};
+      names.forEach(function(s,i){ idx[s] = i % SUBSTRIP.length; });
+      m[c.key] = idx;
+    });
+    return m;
+  })();
+
+  function subSlot(card){
+    var idx = SUBIDX[card.cat];
+    if(card.sub && idx && idx[card.sub] !== undefined) return idx[card.sub];
+    return -1;                       /* no subcategory: fall back to the category */
+  }
+  function cardStrip(card){
+    var s = subSlot(card);
+    return s < 0 ? (SOFT[catByKey(card.cat).color] || SUBSTRIP[0]) : SUBSTRIP[s];
+  }
+  function cardTint(card){
+    var s = subSlot(card);
+    return s < 0 ? (TINT[catByKey(card.cat).color] || SUBTINT[0]) : SUBTINT[s];
   }
   var SIGNATURE = '#F52380';
   function onColor(cat){ return cat.tone === 'light' ? '#241A22' : '#FFFDF9'; }
@@ -1245,10 +1280,9 @@ var CARDS = [{"id":"bread-bowls","title":"Bread Bowls","cat":"breads","catName":
     el.className = 'rcard';
     el.setAttribute('role','button');
     el.setAttribute('tabindex','0');
-    var ck = cardColor(card.id);
-    el.style.setProperty('--c', SOFT[ck]);
-    el.style.setProperty('--t', TINT[ck]);
-    el.style.setProperty('--ct', '#241A22');
+    el.style.setProperty('--c', cardStrip(card));
+    el.style.setProperty('--t', cardTint(card));
+    el.style.setProperty('--ct', '#26302F');
 
     var meta = cardMetaLine(card);
     el.innerHTML =
@@ -1340,8 +1374,11 @@ var CARDS = [{"id":"bread-bowls","title":"Bread Bowls","cat":"breads","catName":
     if(names.length){
       subcatRow.hidden = false;
       var pills = ['<button class="subcat-pill'+(!activeSubcat?' active':'')+'" type="button" data-sub="">All ('+all.length+')</button>'];
-      names.forEach(function(s){
-        pills.push('<button class="subcat-pill'+(activeSubcat===s?' active':'')+'" type="button" data-sub="'+esc(s)+'">'+esc(s)+' ('+counts[s]+')</button>');
+      names.forEach(function(s,i){
+        var sw = SUBSTRIP[i % SUBSTRIP.length];
+        pills.push('<button class="subcat-pill'+(activeSubcat===s?' active':'')+
+          '" type="button" data-sub="'+esc(s)+'" style="--sw:'+sw+'">'+
+          '<span class="sw"></span>'+esc(s)+' ('+counts[s]+')</button>');
       });
       subcatRow.innerHTML = pills.join('');
       Array.prototype.forEach.call(subcatRow.querySelectorAll('.subcat-pill'), function(b){
