@@ -109,13 +109,12 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;}
 .logo{
   display:flex;align-items:center;justify-content:center;
   width:42px;height:42px;flex-shrink:0;
-  border:2px solid var(--ink);
-  color:var(--ink);
+  border-radius:9px;overflow:hidden;
   margin-right:auto;
-  transition:background .15s,color .15s;
+  transition:transform .15s,box-shadow .15s;
 }
-.logo .icon{width:21px;height:21px;stroke-width:1.9;}
-.logo:hover{background:var(--signature);border-color:var(--signature);color:#fff;}
+.logo svg{width:100%;height:100%;display:block;}
+.logo:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(38,48,47,.22);}
 
 .search-shell{position:relative;flex:0 1 340px;min-width:150px;}
 .search-input{
@@ -340,8 +339,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;}
 /* --- compact header on phones: logo, search and saved on one row --- */
 @media (max-width:620px){
   .header-inner{gap:.5rem;padding:.6rem 0;}
-  .logo{width:36px;height:36px;margin-right:0;}
-  .logo .icon{width:18px;height:18px;}
+  .logo{width:36px;height:36px;margin-right:0;border-radius:8px;}
   .search-shell{flex:1 1 auto;min-width:0;}
   .search-input{height:36px;font-size:.8rem;padding:0 .6rem 0 2rem;}
   .search-icon{left:.65rem;width:14px;height:14px;}
@@ -773,10 +771,11 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;}
 <header class="site-header">
   <div class="wrap header-inner">
     <a class="logo" href="#top" aria-label="Home">
-      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M3.2 10.4 12 3.2l8.8 7.2"/>
-        <path d="M5.4 12.2v8a.8.8 0 0 0 .8.8h11.6a.8.8 0 0 0 .8-.8v-8"/>
-        <path d="M9.8 21v-5.6a.8.8 0 0 1 .8-.8h2.8a.8.8 0 0 1 .8.8V21"/>
+      <svg viewBox="0 0 200 200" aria-hidden="true">
+        <rect width="200" height="200" fill="var(--c-tomato)"/>
+        <rect x="34" y="58"  width="132" height="26" rx="5" fill="var(--paper)"/>
+        <rect x="34" y="92"  width="132" height="26" rx="5" fill="var(--c-butter)"/>
+        <rect x="34" y="126" width="84"  height="26" rx="5" fill="var(--c-aqua)"/>
       </svg>
     </a>
 
@@ -872,8 +871,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;}
         <div class="plan-panel" id="planPanel" hidden>
           <label class="field"><span>Date</span><input type="date" id="planDate"></label>
           <label class="field"><span>Time</span><input type="time" id="planTime" value="17:30"></label>
-          <button class="btn btn-solid btn-sm" id="gcalBtn" type="button">Google Calendar</button>
-          <button class="btn btn-outline btn-sm" id="icsBtn" type="button">Apple / Outlook</button>
+          <button class="btn btn-solid btn-sm" id="gcalBtn" type="button">Add to Google Calendar</button>
         </div>
 
         <div class="bigcard-body">
@@ -1699,14 +1697,21 @@ var CARDS = [{"id":"bread-bowls","title":"Bread Bowls","cat":"breads","catName":
 
   document.getElementById('shareBtn').addEventListener('click', function(){
     if(!current) return;
-    var url = location.href;
+    var url = recipeUrl(current);
+    /* no `text` field: several share targets use it INSTEAD of `url`,
+       which is how Copy ended up handing back the bare site address */
     if(navigator.share){
-      navigator.share({title: current.title, text: 'From The Family Recipe Box', url: url})
-        .catch(function(){});
+      navigator.share({title: current.title, url: url}).catch(function(){});
     } else {
       copyText(url, 'Link copied');
     }
   });
+
+  /* build the deep link from the recipe itself so it can never fall back
+     to whatever happens to be in the address bar */
+  function recipeUrl(card){
+    return location.origin + location.pathname + '#recipe/' + card.id;
+  }
 
   /* ---- calendar ---- */
 
@@ -1744,9 +1749,20 @@ var CARDS = [{"id":"bread-bowls","title":"Bread Bowls","cat":"breads","catName":
     if(card.dTime) facts.push((card.dTimeEst?'~':'') + card.dTime);
     if(card.dMacros) facts.push(card.dMacros);
     if(facts.length) lines.push(facts.join('  |  '), '');
+    if(scale !== 1) lines.push('(scaled ' + scale + 'x)', '');
     lines.push('INGREDIENTS');
     lines = lines.concat(ingredientLines(card, scale));
-    lines.push('', location.href);
+    lines.push('', 'DIRECTIONS');
+    var n = 1;
+    splitSections(card.sections).right.forEach(function(sec){
+      sec.items.forEach(function(it){
+        if(it.t !== 'n') return;
+        lines.push(n + '. ' + it.text);
+        (it.subs||[]).forEach(function(s){ lines.push('   - ' + s.text); });
+        n++;
+      });
+    });
+    lines.push('', recipeUrl(card));
     return lines.join('\n');
   }
 
@@ -1758,33 +1774,6 @@ var CARDS = [{"id":"bread-bowls","title":"Bread Bowls","cat":"breads","catName":
       '&dates=' + utcStamp(w.start) + '/' + utcStamp(w.end) +
       '&details=' + encodeURIComponent(eventDetails(current));
     window.open(url, '_blank', 'noopener');
-  });
-
-  document.getElementById('icsBtn').addEventListener('click', function(){
-    if(!current) return;
-    var w = planWindow(); if(!w) return;
-    var ics = [
-      'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//The Family Recipe Box//EN',
-      'BEGIN:VEVENT',
-      'UID:'+current.id+'-'+Date.now()+'@familyrecipebox',
-      'DTSTAMP:'+utcStamp(new Date()),
-      'DTSTART:'+utcStamp(w.start),
-      'DTEND:'+utcStamp(w.end),
-      'SUMMARY:Cook: '+current.title,
-      'DESCRIPTION:'+eventDetails(current).replace(/\\/g,'\\\\').replace(/,/g,'\\,').replace(/;/g,'\\;').replace(/\n/g,'\\n'),
-      'END:VEVENT','END:VCALENDAR'
-    ].join('\r\n');
-    var framed = false;
-    try{ framed = (window.self !== window.top); }catch(e){ framed = true; }
-    try{
-      var blob = new Blob([ics], {type:'text/calendar'});
-      var a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = current.id + '.ics';
-      document.body.appendChild(a); a.click();
-      setTimeout(function(){ URL.revokeObjectURL(a.href); document.body.removeChild(a); }, 400);
-      toast(framed ? 'Preview blocks downloads — works on the live site' : 'Calendar file downloaded');
-    }catch(e){ toast('Download blocked here'); }
   });
 
   /* ============ saved ============ */
