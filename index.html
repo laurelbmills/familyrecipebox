@@ -15,26 +15,26 @@
 }
 
 :root{
-  --paper:#FBF3E6;
-  --paper-2:#F4E7D6;
+  --paper:#FAF7EF;
+  --paper-2:#EDEBE3;
   --white:#FFFDF9;
-  --ink:#241A22;
-  --ink-2:#6B5C66;
-  --ink-3:#A2929C;
+  --ink:#26302F;
+  --ink-2:#7F8480;
+  --ink-3:#B2B3AE;
   --line:rgba(36,26,34,.15);
   --line-2:rgba(36,26,34,.08);
 
-  --signature:#F52380;
+  --signature:#E85B4A;
 
-  --c-butter:#FFFEAE;
-  --c-tangerine:#EBA75C;
-  --c-aqua:#3FC8C0;
-  --c-tomato:#F06038;
-  --c-chartreuse:#D6F74C;
-  --c-vista:#8C9EFF;
-  --c-neonpink:#F52380;
-  --c-bubblegum:#F9A3E2;
-  --c-lavender:#A790EA;
+  --c-butter:#D6E85A;
+  --c-tangerine:#E85B4A;
+  --c-aqua:#8FD6D3;
+  --c-tomato:#E85B4A;
+  --c-chartreuse:#D6E85A;
+  --c-vista:#8FD6D3;
+  --c-neonpink:#E85B4A;
+  --c-bubblegum:#8FD6D3;
+  --c-lavender:#D6E85A;
 
   --display:'Archivo','Helvetica Neue',Arial,sans-serif;
   --ui:'Archivo','Helvetica Neue',Arial,sans-serif;
@@ -892,12 +892,12 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;}
 (function(){
 var CATS = [
   {key:'breakfast',name:'Breakfast',color:'butter',tone:'light'},
-  {key:'breads',name:'Breads &amp; Rolls',color:'tangerine',tone:'light'},
+  {key:'breads',name:'Breads &amp; Rolls',color:'tangerine',tone:'dark'},
   {key:'main',name:'Main Dishes',color:'aqua',tone:'light'},
-  {key:'soups',name:'Soups &amp; Stews',color:'tomato',tone:'light'},
+  {key:'soups',name:'Soups &amp; Stews',color:'tomato',tone:'dark'},
   {key:'sides',name:'Sides &amp; Appetizers',color:'chartreuse',tone:'light'},
   {key:'sauces',name:'Sauces, Dressings &amp; Dips',color:'vista',tone:'light'},
-  {key:'desserts',name:'Desserts',color:'neonpink',tone:'light'},
+  {key:'desserts',name:'Desserts',color:'neonpink',tone:'dark'},
   {key:'drinks',name:'Drinks &amp; Shakes',color:'bubblegum',tone:'light'},
   {key:'pantry',name:'Pantry &amp; Extras',color:'lavender',tone:'light'}
 ];
@@ -1000,22 +1000,10 @@ var CARDS = [{"id":"bread-bowls","title":"Bread Bowls","cat":"breads","catName":
   function clean(s){ return String(s||'').replace(/&amp;/g,'&'); }
   function pad2(n){ return (n<10?'0':'')+n; }
 
-  var COLOR = {
-    butter:'#FFFEAE', tangerine:'#EBA75C', aqua:'#3FC8C0', tomato:'#F06038',
-    chartreuse:'#D6F74C', vista:'#8C9EFF', neonpink:'#F52380',
-    bubblegum:'#F9A3E2', lavender:'#A790EA'
-  };
+  var COLOR = {butter:'#D6E85A', tangerine:'#E85B4A', aqua:'#8FD6D3', tomato:'#E85B4A', chartreuse:'#D6E85A', vista:'#8FD6D3', neonpink:'#E85B4A', bubblegum:'#8FD6D3', lavender:'#D6E85A'};
   /* muted versions used on the recipe cards */
-  var SOFT = {
-    butter:'#FEFCC0', tangerine:'#F3CFA4', aqua:'#98E1DD', tomato:'#F9BCAB',
-    chartreuse:'#E8FAA4', vista:'#CAD2FF', neonpink:'#FBA3CA',
-    bubblegum:'#FBC3EC', lavender:'#D9CEF6'
-  };
-  var TINT = {
-    butter:'#FFFEF0', tangerine:'#FBEDDD', aqua:'#DCF3EF', tomato:'#FCE1D6',
-    chartreuse:'#F8FCDA', vista:'#EAECFA', neonpink:'#FDD6E3',
-    bubblegum:'#FEEDF5', lavender:'#EFE9F6'
-  };
+  var SOFT = {butter:'#E8F3A0', tangerine:'#F3A89D', aqua:'#C2E9E7', tomato:'#F3A89D', chartreuse:'#E8F3A0', vista:'#C2E9E7', neonpink:'#F3A89D', bubblegum:'#C2E9E7', lavender:'#E8F3A0'};
+  var TINT = {butter:'#F8F9DC', tangerine:'#FBE0D9', aqua:'#EBF6F2', tomato:'#FBE0D9', chartreuse:'#F8F9DC', vista:'#EBF6F2', neonpink:'#FBE0D9', bubblegum:'#EBF6F2', lavender:'#F8F9DC'};
   /* every card gets its own color, stable per recipe, so a category page
      reads as a mixed set rather than one flat block of one hue */
   var PALETTE = ['butter','tangerine','aqua','tomato','chartreuse',
