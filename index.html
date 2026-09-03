@@ -1569,7 +1569,10 @@ var CARDS = [{"id":"bread-bowls","title":"Bread Bowls","cat":"breads","catName":
     updateProgress();
   }
 
-  function ingredientLines(card, mult){
+  /* `bullet` is what each ingredient line starts with. Plain-text targets
+     (copy, print) keep the dash; the calendar passes a real bullet. */
+  function ingredientLines(card, mult, bullet){
+    var b = bullet || '- ';
     var out = [];
     splitSections(card.sections).left.forEach(function(sec){
       sec.items.forEach(function(it){
@@ -1577,9 +1580,9 @@ var CARDS = [{"id":"bread-bowls","title":"Bread Bowls","cat":"breads","catName":
         var bold = isBoldLabel(it.text);
         if(bold){
           out.push(bold.toUpperCase());
-          (it.subs||[]).forEach(function(s){ out.push('- ' + ingredientText(s.text, mult)); });
+          (it.subs||[]).forEach(function(s){ out.push(b + ingredientText(s.text, mult)); });
         } else {
-          out.push('- ' + ingredientText(it.text, mult));
+          out.push(b + ingredientText(it.text, mult));
         }
       });
     });
@@ -1773,29 +1776,48 @@ var CARDS = [{"id":"bread-bowls","title":"Bread Bowls","cat":"breads","catName":
     return d.getUTCFullYear()+p(d.getUTCMonth()+1)+p(d.getUTCDate())+'T'+
            p(d.getUTCHours())+p(d.getUTCMinutes())+'00Z';
   }
+  /* Google Calendar renders a small HTML subset in the description (b, i, u,
+     br) and ignores plain newlines, so this builds HTML and joins on <br>.
+     Recipe text is escaped first, or a stray < in a note eats the rest. */
   function eventDetails(card){
+    /* quotes are left alone: escaping them shows a literal &quot; in the
+       calendar views that render the description as plain text */
+    function e(s){
+      return String(s==null?'':s)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
     var lines = [];
     var facts = [];
     var sv = servesText(card.dServes); if(sv) facts.push(sv);
     if(card.dTime) facts.push((card.dTimeEst?'~':'') + card.dTime);
     if(card.dMacros) facts.push(card.dMacros);
-    if(facts.length) lines.push(facts.join('  |  '), '');
+    if(facts.length) lines.push(e(facts.join('  |  ')), '');
     if(scale !== 1) lines.push('(scaled ' + scale + 'x)', '');
-    lines.push('INGREDIENTS');
-    lines = lines.concat(ingredientLines(card, scale));
-    lines.push('', 'DIRECTIONS');
+    lines.push('<b>INGREDIENTS</b>');
+    ingredientLines(card, scale, '• ').forEach(function(l){
+      lines.push(e(l));
+    });
+    lines.push('', '<b>DIRECTIONS</b>');
     var n = 1;
     splitSections(card.sections).right.forEach(function(sec){
       sec.items.forEach(function(it){
         if(it.t !== 'n') return;
-        lines.push(n + '. ' + it.text);
-        (it.subs||[]).forEach(function(s){ lines.push('   - ' + s.text); });
+        lines.push('<b>' + n + '.</b> ' + e(it.text));
+        /* leading spaces collapse in HTML, so indent with nbsp */
+        (it.subs||[]).forEach(function(s){
+          lines.push('&nbsp;&nbsp;&nbsp;• ' + e(s.text));
+        });
         n++;
       });
     });
-    lines.push('', recipeUrl(card));
-    return lines.join('\n');
+    lines.push('', e(recipeUrl(card)));
+    return lines.join('<br>');
   }
+
+  /* Calendar this drops the event on. A Google calendar is addressed by its
+     ID, not its display name: Calendar settings > the calendar > Integrate
+     calendar > Calendar ID. Empty = whatever Google defaults to. */
+  var GCAL_SRC = '';
 
   document.getElementById('gcalBtn').addEventListener('click', function(){
     if(!current) return;
@@ -1803,7 +1825,8 @@ var CARDS = [{"id":"bread-bowls","title":"Bread Bowls","cat":"breads","catName":
     var url = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
       '&text=' + encodeURIComponent('Cook: ' + current.title) +
       '&dates=' + utcStamp(w.start) + '/' + utcStamp(w.end) +
-      '&details=' + encodeURIComponent(eventDetails(current));
+      '&details=' + encodeURIComponent(eventDetails(current)) +
+      (GCAL_SRC ? '&src=' + encodeURIComponent(GCAL_SRC) : '');
     window.open(url, '_blank', 'noopener');
   });
 
