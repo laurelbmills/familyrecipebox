@@ -1823,7 +1823,7 @@ var CARDS = [{"id":"bread-bowls","title":"Bread Bowls","cat":"breads","catName":
     if(!current) return;
     var w = planWindow(); if(!w) return;
     var url = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
-      '&text=' + encodeURIComponent('Cook: ' + current.title) +
+      '&text=' + encodeURIComponent(current.title) +
       '&dates=' + utcStamp(w.start) + '/' + utcStamp(w.end) +
       '&details=' + encodeURIComponent(eventDetails(current)) +
       (GCAL_SRC ? '&src=' + encodeURIComponent(GCAL_SRC) : '');
