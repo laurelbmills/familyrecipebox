@@ -1,7 +1,7 @@
 {
  "name": "The Family Recipe Box",
  "site": "https://familyrecipes.millsmanor.org/",
- "count": 561,
+ "count": 562,
  "recipes": [
   {
    "id": "bread-bowls",
@@ -9852,6 +9852,60 @@
     "Pour sauce over the top.",
     "Cover tightly with foil.",
     "Bake 2 to 2.5 hours until tender."
+   ]
+  },
+  {
+   "id": "creamy-curry-beef-rice-bowls",
+   "title": "Creamy Curry Beef Rice Bowls",
+   "url": "https://familyrecipes.millsmanor.org/#recipe/creamy-curry-beef-rice-bowls",
+   "category": "Main Dishes",
+   "categoryKey": "main",
+   "subcategory": "Bowls & Salads",
+   "serves": "4 servings",
+   "time": "40 min",
+   "timeIsEstimate": true,
+   "calories": null,
+   "macros": null,
+   "tags": [
+    "Crowd Pleaser"
+   ],
+   "source": null,
+   "ingredients": [
+    "Beef:",
+    "1 lb. ground beef",
+    "4 cloves garlic, minced",
+    "1 Tbs. smoked paprika",
+    "¼ tsp. cayenne pepper",
+    "¼ tsp. red chili flakes",
+    "Generous pinch of salt",
+    "Broth:",
+    "2½ Tbs. red curry paste",
+    "2 cloves garlic, minced",
+    "¾ cup half-and-half, or coconut milk",
+    "1 cup bone broth",
+    "Salt, to taste",
+    "Fresh lime juice",
+    "Fresh cilantro, chopped",
+    "Quick pickled red onions:",
+    "½ large red onion, sliced very thin",
+    "Juice of 1 lemon",
+    "Sea salt",
+    "To serve:",
+    "4 servings rice of choice",
+    "Cucumber, thinly sliced",
+    "Sesame seeds",
+    "Korean chili flakes",
+    "Fresh cilantro, finely chopped"
+   ],
+   "directions": [
+    "Brown the ground beef in a large pan over medium-high heat, breaking it apart as it cooks. Add the garlic, smoked paprika, cayenne, red chili flakes and a generous pinch of salt. Brown it really well.",
+    "For the broth, warm the red curry paste and garlic in a saucepan over medium heat. Stir for 1 to 2 minutes, until softened and fragrant.",
+    "Pour in the half-and-half and the bone broth. Stir until smooth and bring to a gentle simmer.",
+    "Season the broth with a couple generous pinches of salt, fresh lime juice and chopped cilantro. Taste and adjust. You want it creamy, savory, a little spicy, and bright from the lime.",
+    "For the pickled onions, put the sliced red onion in a bowl with the lemon juice and a sprinkle of sea salt. Mix well with a fork and let it sit 5 to 10 minutes to soften.",
+    "Cook 4 servings of rice. Swapping the water for bone broth adds flavor and protein.",
+    "To assemble, add ¾ cup cooked rice to a bowl, top with a quarter of the beef, and ladle a quarter of the broth over everything.",
+    "Finish with thinly sliced cucumber, the pickled onions, sesame seeds, Korean chili flakes and plenty of chopped cilantro."
    ]
   },
   {
